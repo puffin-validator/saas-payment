@@ -1,0 +1,17 @@
+[package]
+name = "saas-payment"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+solana-rpc-client = "2.3.13"
+solana-rpc-client-api = "2.3.13"
+solana-commitment-config = "2.2.1"
+solana-keypair = "2.2.3"
+solana-signer = "2.2.1"
+solana-transaction = "2.2.3"
+spl-stake-pool = "2.0.3"
+spl-associated-token-account-client = "2.0.0"
+solana-instruction = "2.3.3"
+clap = {  version = "4.5.0", features = ["derive"] }
+borsh = "1.6.0"

@@ -198,7 +198,7 @@ fn pay(ixs: &mut Vec<Instruction>, invoices: &Vec<Invoice>, payer: &Pubkey, vsol
     }
 }
 
-fn pay_invoices(rpc_client: &RpcClient, payer: &Keypair, invoices: Vec<Invoice>) {
+fn pay_invoices(rpc_client: &RpcClient, payer: &Keypair, invoices: Vec<Invoice>, auto: bool) {
     let pool_data = rpc_client
         .get_account_data(&STAKE_POOL)
         .expect("Cannot get stake pool data from RPC");
@@ -225,30 +225,33 @@ fn pay_invoices(rpc_client: &RpcClient, payer: &Keypair, invoices: Vec<Invoice>)
 
     pay(&mut ixs, &invoices, &payer_pk, &vsol_ata);
 
-    println!("Proceed to payment?");
-    let mut response = String::new();
-    std::io::stdin()
-        .read_line(&mut response)
-        .expect("Failed to get input");
+    if !auto {
+        println!("Proceed to payment?");
+        let mut response = String::new();
+        std::io::stdin()
+            .read_line(&mut response)
+            .expect("Failed to get input");
+        if !response.to_lowercase().starts_with("y") {
+            return;
+        }
+    }
 
-    if response.to_lowercase().starts_with("y") {
-        for chunk in ixs.chunks(5) {
-            let tx = Transaction::new_signed_with_payer(
-                chunk,
-                Some(&payer_pk),
-                &vec![payer],
-                rpc_client
-                    .get_latest_blockhash_with_commitment(CommitmentConfig::finalized())
-                    .unwrap()
-                    .0,
-            );
-            match rpc_client.send_and_confirm_transaction_with_spinner(&tx) {
-                Ok(sig) => {
-                    println!("{}", sig);
-                }
-                Err(e) => {
-                    panic!("Tx {} failed: {}", tx.get_signature(), e);
-                }
+    for chunk in ixs.chunks(5) {
+        let tx = Transaction::new_signed_with_payer(
+            chunk,
+            Some(&payer_pk),
+            &vec![payer],
+            rpc_client
+                .get_latest_blockhash_with_commitment(CommitmentConfig::finalized())
+                .unwrap()
+                .0,
+        );
+        match rpc_client.send_and_confirm_transaction_with_spinner(&tx) {
+            Ok(sig) => {
+                println!("{}", sig);
+            }
+            Err(e) => {
+                panic!("Tx {} failed: {}", tx.get_signature(), e);
             }
         }
     }
@@ -284,6 +287,6 @@ fn main() {
             panic!("Could not read keypair: {}", e);
         });
 
-        pay_invoices(&rpc_client, &payer, invoices);
+        pay_invoices(&rpc_client, &payer, invoices, args.auto);
     }
 }

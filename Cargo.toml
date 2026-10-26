@@ -1,6 +1,6 @@
 [package]
 name = "saas-payment"
-version = "0.1.1"
+version = "1.0.0"
 edition = "2024"
 
 [dependencies]
@@ -10,8 +10,8 @@ solana-commitment-config = "2.2.1"
 solana-keypair = "2.2.3"
 solana-signer = "2.2.1"
 solana-transaction = "2.2.3"
-spl-stake-pool = "2.0.3"
+solana-pubkey = "2.4.0"
 spl-associated-token-account-client = "2.0.0"
-solana-instruction = "2.3.3"
+solana-instruction = { version = "2.3.3", features = ["borsh"] }
 clap = {  version = "4.5.0", features = ["derive"] }
 borsh = "1.6.0"
